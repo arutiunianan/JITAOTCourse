@@ -1,0 +1,21 @@
+DATA_DEF(UNDEFINED, "daaaaamn")
+
+DATA_DEF(VOID, "void")
+
+DATA_DEF(I8, "i8")
+
+DATA_DEF(U8, "u8")
+
+DATA_DEF(I16, "i16")
+
+DATA_DEF(U16, "u16")
+
+DATA_DEF(I32, "i32")
+
+DATA_DEF(U32, "u32")
+
+DATA_DEF(I64, "i64")
+
+DATA_DEF(U64, "u64")
+
+DATA_DEF(REF, "ref")
