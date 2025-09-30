@@ -30,7 +30,7 @@ std::string DataTypeToStr(DataType datatype) {
 
 void Instruction::Dump(std::stringstream &ss) const
 {
-    ss << instrId_ << "." << DataTypeToStr(resultType_) << " " << OpToString(optype_) << " ";
+    ss << instrId_ << ". " << DataTypeToStr(resultType_) << " " << OpToString(optype_) << " ";
 }
 
 void ParameterInstr::Dump(std::stringstream &ss) const

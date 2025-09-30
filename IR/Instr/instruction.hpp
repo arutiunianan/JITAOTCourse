@@ -9,14 +9,6 @@
 class Instruction;
 class BasicBlock;
 
-struct Input {
-    Instruction* input {nullptr};
-};
-
-struct User {
-    Instruction* user {nullptr};
-};
-
 class Instruction {
 public:
     Instruction(OpType optype, DataType resultType = DataType::UNDEFINED):
@@ -24,82 +16,46 @@ public:
 
     virtual ~Instruction() = default;
 
-    void SetParentBB(BasicBlock* bb) {
-        parentBB_ = bb;
-    }
+    struct Input {
+        Instruction* input = nullptr;
+    };
+    struct User {
+        Instruction* user = nullptr;
+    };
 
-    BasicBlock* GetParentBB() const {
-        return parentBB_;
-    }
+    void SetParentBB(BasicBlock* bb);
+    BasicBlock* GetParentBB() const;
 
-    void SetNext(Instruction* nextInstr) {
-        next_ = nextInstr;
-    }
+    void SetNext(Instruction* nextInstr);
+    Instruction* GetNext() const;
 
-    Instruction* GetNext() const {
-        return next_;
-    }
+    void SetPrev(Instruction* prevInstr);
+    Instruction* GetPrev() const;
 
-    void SetPrev(Instruction* prevInstr) {
-        prev_ = prevInstr;
-    }
+    void AddInput(Instruction* input);
+    void AddUser(Instruction* user);
 
-    Instruction* GetPrev() const {
-        return prev_;
-    }
+    void SetInputs(std::vector<Input> inputs);
+    const std::vector<Input>& GetInputs() const;
 
-    void AddInput(Instruction* input) {
-        inputs_.push_back(Input {input});
-    }
+    bool IsPhi() const;
+    bool IsJmp() const;
+    bool IsBranch() const;
 
-    void AddUser(Instruction* user) {
-        users_.push_back(User {user});
-    }
-
-    void SetInputs(std::vector<Input> inputs) {
-        inputs_ = std::move(inputs);
-    }
-
-    const std::vector<Input> &GetInputs() const {
-        return inputs_;
-    }
-
-    bool IsPhi() const {
-        return optype_ == OpType::PHI;
-    }
-
-    bool IsJmp() const {
-        return optype_ == OpType::JMP;
-    }
-
-    bool IsBranch() const {
-        return (optype_ == OpType::JA)  ||
-               (optype_ == OpType::JAE) ||
-               (optype_ == OpType::JE);
-    }
-
-    void SetResultType(DataType type) {
-        resultType_ = type;
-    }
-
-    void SetId(size_t id) {
-        instrId_ = id;
-    }
-
-    size_t GetId() const {
-        return instrId_;
-    }
+    void SetResultType(DataType type);
+    void SetId(size_t id);
+    size_t GetId() const;
 
     virtual void Dump(std::stringstream &ss) const;
 
 private:
-    Instruction* prev_ {nullptr};
-    Instruction* next_ {nullptr};
+    Instruction* prev_ = nullptr;
+    Instruction* next_ = nullptr;
 
-    BasicBlock* parentBB_ {nullptr};
+    BasicBlock* parentBB_ = nullptr;
 
-    size_t instrId_ {0};
-    OpType optype_ {OpType::UNDEFINED};
+    size_t instrId_ = 0;
+    OpType optype_ = OpType::UNDEFINED;
     DataType resultType_;
 
     std::vector<Input> inputs_;
@@ -113,14 +69,12 @@ public:
     ParameterInstr(uint32_t argNum): Instruction(OpType::PRM, DataType::U32), 
                                     argNum_(argNum) {}
 
-    uint32_t GetArgNum() const {
-        return argNum_;
-    }
+    uint32_t GetArgNum() const;
 
     void Dump(std::stringstream &ss) const override;
 
 private:
-    uint32_t argNum_ {0};
+    uint32_t argNum_ = 0;
 };
 
 class ConstantInstr final: public Instruction {
@@ -135,28 +89,17 @@ public:
         }
     }
 
-    bool IsSignedInt() const {
-        return type_ == DataType::I64;
-    }
-
-    bool IsUnsignedInt() const {
-        return type_ == DataType::U64;
-    }
-
-    int64_t GetAsSignedInt() const {
-        return static_cast<int64_t>(value_);
-    }
-
-    uint64_t GetAsUnsignedInt() const {
-        return value_;
-    }
+    bool IsSignedInt() const;
+    bool IsUnsignedInt() const;
+    int64_t GetAsSignedInt() const;
+    uint64_t GetAsUnsignedInt() const;
 
     void Dump(std::stringstream &ss) const override;
 
 private:
-    DataType type_ {DataType::UNDEFINED};
+    DataType type_ = DataType::UNDEFINED;
 
-    uint64_t value_ {0};
+    uint64_t value_ = 0;
 };
 
 class PhiInstr final: public Instruction {
@@ -164,7 +107,6 @@ public:
     PhiInstr(DataType resultType): Instruction(OpType::PHI, resultType) {}
 
     BasicBlock* GetPhiInputBB(size_t idx);
-
     Instruction* GetPhiInput(BasicBlock* bb);
 
     void Dump(std::stringstream &ss) const override;
@@ -218,9 +160,7 @@ class JmpInstr final: public Instruction {
 public:
     JmpInstr(BasicBlock* bbToJmp): Instruction(OpType::JMP, DataType::VOID), bbToJmp_(bbToJmp) {}
 
-    BasicBlock* GetBBToJmp() const {
-        return bbToJmp_;
-    }
+    BasicBlock* GetBBToJmp() const;
 
     void Dump(std::stringstream &ss) const override;
 
@@ -242,19 +182,14 @@ public:
         input->AddUser(this);
     }
 
-    BasicBlock* GetTrueBranchBB() const {
-        return ifTrueBB_;
-    }
-
-    BasicBlock* GetFalseBranchBB() const {
-        return ifFalseBB_;
-    }
+    BasicBlock* GetTrueBranchBB() const;
+    BasicBlock* GetFalseBranchBB() const;
 
     void Dump(std::stringstream &ss) const override;
 
 private:
-    BasicBlock* ifTrueBB_ {nullptr};
-    BasicBlock* ifFalseBB_ {nullptr};
+    BasicBlock* ifTrueBB_ = nullptr;
+    BasicBlock* ifFalseBB_ = nullptr;
 };
 
 class JaInstr final: public CjmpInstr {
@@ -286,7 +221,7 @@ public:
     void Dump(std::stringstream &ss) const override;
 
 private:
-    Instruction* retValue_ {nullptr};
+    Instruction* retValue_ = nullptr;
 };
 
 

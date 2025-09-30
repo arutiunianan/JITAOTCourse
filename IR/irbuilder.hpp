@@ -50,9 +50,9 @@ public:
     Instruction* CreateRet(DataType retType, Instruction* input);
 
 private:
-    Graph* graph_ {nullptr};
+    Graph* graph_ = nullptr;
 
-    BasicBlock* currentBB_ {nullptr};
+    BasicBlock* currentBB_ = nullptr;
 };
 
 

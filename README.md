@@ -4,7 +4,7 @@
 
 ```
 mkdir build && cd build
-cmake ../
-make
-./myir
+cmake ../ -G Ninja
+ninja
+./My_IR
 ```
