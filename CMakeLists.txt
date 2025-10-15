@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Werror -Wno-inv
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
 add_subdirectory(IR)
+add_subdirectory(tests)
 
 add_executable(My_IR main.cpp)
 target_link_libraries(My_IR PRIVATE IR_lib)
