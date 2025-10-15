@@ -1,8 +1,7 @@
 #include "dfs.hpp"
 #include "Graph/graph.hpp"
 
-std::vector<BasicBlock*> DFS::Run()
-{
+std::vector<BasicBlock*> DFS::Run() {
     std::vector<BasicBlock*> dfsVector;
     std::unordered_set<BasicBlock*> visitSet;
 
@@ -12,8 +11,7 @@ std::vector<BasicBlock*> DFS::Run()
 }
 
 void DFS::DFSImpl(std::vector<BasicBlock*> &dfsVector, std::unordered_set<BasicBlock*> &visitSet,
-                  BasicBlock* block)
-{
+                  BasicBlock* block) {
     visitSet.insert(block);
     dfsVector.push_back(block);
 
