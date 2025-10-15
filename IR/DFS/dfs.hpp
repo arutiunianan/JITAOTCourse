@@ -13,6 +13,7 @@ public:
     DFS(Graph* graph): graph_(graph) {}
 
     std::vector<BasicBlock*> Run();
+    std::vector<BasicBlock*> Run(std::unordered_set<BasicBlock*> &visitSet);
 private:
     void DFSImpl(std::vector<BasicBlock*> &dfsVector, std::unordered_set<BasicBlock*> &visitSet,
                  BasicBlock* block);

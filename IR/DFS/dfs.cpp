@@ -1,11 +1,19 @@
 #include "dfs.hpp"
 #include "Graph/graph.hpp"
 
-std::vector<BasicBlock*> DFS::Run() {
-    std::vector<BasicBlock*> dfsVector;
-    std::unordered_set<BasicBlock*> visitSet;
+#include <iostream>
 
-    DFSImpl(dfsVector, visitSet, graph_->GetStartBlock());
+std::vector<BasicBlock*> DFS::Run() {
+    std::unordered_set<BasicBlock*> visitSet;
+    return Run(visitSet);
+}
+
+std::vector<BasicBlock*> DFS::Run(std::unordered_set<BasicBlock*> &visitSet) {
+    std::vector<BasicBlock*> dfsVector;
+    BasicBlock* startBlock = graph_->GetStartBlock();
+    if(visitSet.find(startBlock) ==  visitSet.end()) {
+        DFSImpl(dfsVector, visitSet, startBlock);
+    }
 
     return dfsVector;
 }
