@@ -7,6 +7,10 @@ void Graph::AddBlock(std::unique_ptr<BasicBlock> block) {
     basicBlocks_.push_back(std::move(block));
 }
 
+BasicBlock* Graph::GetStartBlock() const {
+    return basicBlocks_.front().get();
+}
+
 void Graph::AddInstruction(std::unique_ptr<Instruction> instr) {
     instr->SetId(instructions_.size());
     instructions_.push_back(std::move(instr));

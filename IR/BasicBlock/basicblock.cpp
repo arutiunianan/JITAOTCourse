@@ -32,6 +32,14 @@ void BasicBlock::AddPredecessor(BasicBlock* block) {
     predecessors_.push_back(block);
 }
 
+const std::vector<BasicBlock*>& BasicBlock::GetSuccessors() const {
+    return successors_;
+}
+
+const std::vector<BasicBlock*>& BasicBlock::GetPredecessors() const {
+    return predecessors_;
+}
+
 Instruction* BasicBlock::GetLastInstr() const {
     return lastInstr_;
 }

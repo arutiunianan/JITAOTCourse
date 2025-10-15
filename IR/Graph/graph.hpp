@@ -10,6 +10,7 @@
 class Graph final {
 public:
     void AddBlock(std::unique_ptr<BasicBlock> block);
+    BasicBlock *GetStartBlock() const;
     void AddInstruction(std::unique_ptr<Instruction> instr);
 
     void Dump(std::stringstream &ss) const;

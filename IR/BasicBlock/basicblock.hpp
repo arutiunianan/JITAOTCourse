@@ -21,6 +21,8 @@ public:
 
     void AddSuccessor(BasicBlock* block);
     void AddPredecessor(BasicBlock* block);
+    const std::vector<BasicBlock *> &GetSuccessors() const;
+    const std::vector<BasicBlock *> &GetPredecessors() const;
 
     void Dump(std::stringstream &ss) const;
 
