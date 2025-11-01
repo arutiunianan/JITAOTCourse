@@ -29,3 +29,28 @@ void DFS::DFSImpl(std::vector<BasicBlock*> &dfsVector, std::unordered_set<BasicB
         }
     }
 }
+
+std::vector<std::pair<BasicBlock*, BasicBlock*>> DFS::RunLoopAnalyzer() {
+    std::unordered_map<BasicBlock*, NodeColor> visitMap;
+    std::vector<std::pair<BasicBlock*, BasicBlock*>> analyzerResult;
+    BasicBlock* startBlock = graph_->GetStartBlock();
+
+    DFSImpl(analyzerResult, visitMap, startBlock);
+    return analyzerResult;
+}
+
+void DFS::DFSImpl(std::vector<std::pair<BasicBlock*, BasicBlock*>> &analyzerResult,
+                  std::unordered_map<BasicBlock*, NodeColor> &visitMap, BasicBlock* block) {
+    visitMap[block] = NodeColor::GREY;
+
+    for(auto succBlock: block->GetSuccessors()) {
+        if(visitMap.find(succBlock) == visitMap.end()) {
+            DFSImpl(analyzerResult, visitMap, succBlock);
+        }
+        if(visitMap[succBlock] == NodeColor::GREY) {
+            analyzerResult.push_back({succBlock, block});
+        }
+    }
+
+    visitMap[block] = NodeColor::BLACK;
+}

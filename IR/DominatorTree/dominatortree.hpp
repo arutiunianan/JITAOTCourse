@@ -12,6 +12,7 @@ public:
     DominatorTree(Graph* graph): graph_(graph) {}
     const std::vector<BasicBlock*> &GetImmediateDominatedBlocks(BasicBlock* block) const;
     std::vector<BasicBlock*> &GetImmediateDominatedBlocks(BasicBlock* block);
+    bool Dominates(BasicBlock* dominator, BasicBlock* dominated) const;
 
     void Build();
 

@@ -1,6 +1,8 @@
 find_package(GTest REQUIRED)
 
-add_executable(IR_tests main.cpp dominatortree.cpp)
+add_executable(IR_tests main.cpp 
+    dominatortree.cpp
+    loopanalyzer.cpp)
 
 target_include_directories(IR_tests PRIVATE 
     ${CMAKE_SOURCE_DIR}/IR
@@ -9,6 +11,7 @@ target_include_directories(IR_tests PRIVATE
     ${CMAKE_SOURCE_DIR}/IR/DominatorTree
     ${CMAKE_SOURCE_DIR}/IR/Graph
     ${CMAKE_SOURCE_DIR}/IR/Instr
+    ${CMAKE_SOURCE_DIR}/IR/LoopAnalyzer
 )
 
 target_link_libraries(IR_tests PRIVATE 

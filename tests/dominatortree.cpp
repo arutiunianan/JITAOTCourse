@@ -3,6 +3,37 @@
 #include "DominatorTree/dominatortree.hpp"
 #include "irbuilder.hpp"
 
+class DominatorTreeTest: public ::testing::Test {
+protected:
+    void SetUp() override {
+        graph_ = std::make_unique<Graph>();
+    }
+
+    void TearDown() override {
+        graph_.reset();
+    }
+
+    BasicBlock *CreateBlock() {
+        auto block = std::make_unique<BasicBlock>();
+        BasicBlock *ptr = block.get();
+        graph_->AddBlock(std::move(block));
+        return ptr;
+    }
+
+    void LinkBlocks(BasicBlock *from, BasicBlock *to) {
+        from->AddSuccessor(to);
+        to->AddPredecessor(from);
+    }
+
+    void BuildDominatorTree() {
+        tree_ = std::make_unique<DominatorTree>(graph_.get());
+        tree_->Build();
+    }
+
+    std::unique_ptr<Graph> graph_;
+    std::unique_ptr<DominatorTree> tree_;
+};
+
 /*
     Graph:    Dominator Tree:
       A             A
@@ -15,35 +46,33 @@
      \ |  /
        D
 */
-TEST(DominatorTree, TEST_1) {
+TEST_F(DominatorTreeTest, TEST_1) {
     Graph graph;
-    IrBuilder builder(&graph);
 
-    auto* a = builder.CreateBB();
-    auto* b = builder.CreateBB();
-    auto* c = builder.CreateBB();
-    auto* d = builder.CreateBB();
-    auto* e = builder.CreateBB();
-    auto* f = builder.CreateBB();
-    auto* g = builder.CreateBB();
+    auto *a = CreateBlock();
+    auto *b = CreateBlock();
+    auto *c = CreateBlock();
+    auto *d = CreateBlock();
+    auto *e = CreateBlock();
+    auto *f = CreateBlock();
+    auto *g = CreateBlock();
 
-    a->AddSuccessor(b);
-    b->AddSuccessor(c);
-    b->AddSuccessor(f);
-    c->AddSuccessor(d);
-    f->AddSuccessor(e);
-    f->AddSuccessor(g);
-    g->AddSuccessor(d);
-    e->AddSuccessor(d);
+    LinkBlocks(a, b);
+    LinkBlocks(b, c);
+    LinkBlocks(b, f);
+    LinkBlocks(c, d);
+    LinkBlocks(f, e);
+    LinkBlocks(f, g);
+    LinkBlocks(g, d);
+    LinkBlocks(e, d);
 
-    DominatorTree tree(&graph);
-    tree.Build();
+    BuildDominatorTree();
 
-    auto &aImmDom = tree.GetImmediateDominatedBlocks(a);
+    auto &aImmDom = tree_->GetImmediateDominatedBlocks(a);
     ASSERT_EQ(aImmDom.size(), 1);
     ASSERT_EQ(aImmDom[0], b);
 
-    auto &bImmDom = tree.GetImmediateDominatedBlocks(b);
+    auto &bImmDom = tree_->GetImmediateDominatedBlocks(b);
     ASSERT_EQ(bImmDom.size(), 3);
 
     std::set<BasicBlock*> expectedBImmDom = {c, f, d};
@@ -52,13 +81,13 @@ TEST(DominatorTree, TEST_1) {
         ASSERT_FALSE(findIt == expectedBImmDom.end());
     }
 
-    auto &cImmDom = tree.GetImmediateDominatedBlocks(c);
+    auto &cImmDom = tree_->GetImmediateDominatedBlocks(c);
     ASSERT_EQ(cImmDom.size(), 0);
 
-    auto &dImmDom = tree.GetImmediateDominatedBlocks(d);
+    auto &dImmDom = tree_->GetImmediateDominatedBlocks(d);
     ASSERT_EQ(dImmDom.size(), 0);
 
-    auto &fImmDom = tree.GetImmediateDominatedBlocks(f);
+    auto &fImmDom = tree_->GetImmediateDominatedBlocks(f);
     ASSERT_EQ(fImmDom.size(), 2);
 
     std::set<BasicBlock*> expectedFImmDom = {e, g};
@@ -87,45 +116,44 @@ TEST(DominatorTree, TEST_1) {
           v                             v
           J                             H
 */
-TEST(DominatorTree, TEST_2) {
+TEST_F(DominatorTreeTest, TEST_2) {
     Graph graph;
     IrBuilder builder(&graph);
 
-    auto* a = builder.CreateBB();
-    auto* b = builder.CreateBB();
-    auto* c = builder.CreateBB();
-    auto* d = builder.CreateBB();
-    auto* e = builder.CreateBB();
-    auto* f = builder.CreateBB();
-    auto* g = builder.CreateBB();
-    auto* h = builder.CreateBB();
-    auto* i = builder.CreateBB();
-    auto* j = builder.CreateBB();
-    auto* k = builder.CreateBB();
+    auto *a = CreateBlock();
+    auto *b = CreateBlock();
+    auto *c = CreateBlock();
+    auto *d = CreateBlock();
+    auto *e = CreateBlock();
+    auto *f = CreateBlock();
+    auto *g = CreateBlock();
+    auto *h = CreateBlock();
+    auto *i = CreateBlock();
+    auto *j = CreateBlock();
+    auto *k = CreateBlock();
 
-    a->AddSuccessor(b);
-    b->AddSuccessor(c);
-    b->AddSuccessor(j);
-    j->AddSuccessor(c);
-    c->AddSuccessor(d);
-    d->AddSuccessor(c);
-    d->AddSuccessor(e);
-    e->AddSuccessor(f);
-    f->AddSuccessor(e);
-    f->AddSuccessor(g);
-    g->AddSuccessor(i);
-    g->AddSuccessor(h);
-    h->AddSuccessor(b);
-    i->AddSuccessor(k);
+    LinkBlocks(a, b);
+    LinkBlocks(b, c);
+    LinkBlocks(b, j);
+    LinkBlocks(j, c);
+    LinkBlocks(c, d);
+    LinkBlocks(d, c);
+    LinkBlocks(d, e);
+    LinkBlocks(e, f);
+    LinkBlocks(f, e);
+    LinkBlocks(f, g);
+    LinkBlocks(g, i);
+    LinkBlocks(g, h);
+    LinkBlocks(h, b);
+    LinkBlocks(i, k);
 
-    DominatorTree tree(&graph);
-    tree.Build();
+    BuildDominatorTree();
 
-    auto &aImmDom = tree.GetImmediateDominatedBlocks(a);
+    auto &aImmDom = tree_->GetImmediateDominatedBlocks(a);
     ASSERT_EQ(aImmDom.size(), 1);
     ASSERT_EQ(aImmDom[0], b);
 
-    auto &bImmDom = tree.GetImmediateDominatedBlocks(b);
+    auto &bImmDom = tree_->GetImmediateDominatedBlocks(b);
     ASSERT_EQ(bImmDom.size(), 2);
 
     std::set<BasicBlock*> expectedBImmDom = {c, j};
@@ -134,26 +162,26 @@ TEST(DominatorTree, TEST_2) {
         ASSERT_FALSE(findIt == expectedBImmDom.end());
     }
 
-    auto &jImmDom = tree.GetImmediateDominatedBlocks(j);
+    auto &jImmDom = tree_->GetImmediateDominatedBlocks(j);
     ASSERT_EQ(jImmDom.size(), 0);
 
-    auto &cImmDom = tree.GetImmediateDominatedBlocks(c);
+    auto &cImmDom = tree_->GetImmediateDominatedBlocks(c);
     ASSERT_EQ(cImmDom.size(), 1);
     ASSERT_EQ(cImmDom[0], d);
 
-    auto &dImmDom = tree.GetImmediateDominatedBlocks(d);
+    auto &dImmDom = tree_->GetImmediateDominatedBlocks(d);
     ASSERT_EQ(dImmDom.size(), 1);
     ASSERT_EQ(dImmDom[0], e);
 
-    auto &eImmDom = tree.GetImmediateDominatedBlocks(e);
+    auto &eImmDom = tree_->GetImmediateDominatedBlocks(e);
     ASSERT_EQ(eImmDom.size(), 1);
     ASSERT_EQ(eImmDom[0], f);
 
-    auto &fImmDom = tree.GetImmediateDominatedBlocks(f);
+    auto &fImmDom = tree_->GetImmediateDominatedBlocks(f);
     ASSERT_EQ(fImmDom.size(), 1);
     ASSERT_EQ(fImmDom[0], g);
 
-    auto &gImmDom = tree.GetImmediateDominatedBlocks(g);
+    auto &gImmDom = tree_->GetImmediateDominatedBlocks(g);
     ASSERT_EQ(gImmDom.size(), 2);
 
     std::set<BasicBlock*> expectedGImmDom = {h, i};
@@ -162,14 +190,14 @@ TEST(DominatorTree, TEST_2) {
         ASSERT_FALSE(findIt == expectedGImmDom.end());
     }
 
-    auto &iImmDom = tree.GetImmediateDominatedBlocks(i);
+    auto &iImmDom = tree_->GetImmediateDominatedBlocks(i);
     ASSERT_EQ(iImmDom.size(), 1);
     ASSERT_EQ(iImmDom[0], k);
 
-    auto &kImmDom = tree.GetImmediateDominatedBlocks(k);
+    auto &kImmDom = tree_->GetImmediateDominatedBlocks(k);
     ASSERT_EQ(kImmDom.size(), 0);
 
-    auto &hImmDom = tree.GetImmediateDominatedBlocks(h);
+    auto &hImmDom = tree_->GetImmediateDominatedBlocks(h);
     ASSERT_EQ(hImmDom.size(), 0);
 }
 
@@ -193,49 +221,48 @@ TEST(DominatorTree, TEST_2) {
             \---> G
              \---> I
 */
-TEST(DominatorTree, TEST_3) {
+TEST_F(DominatorTreeTest, TEST_3) {
     Graph graph;
     IrBuilder builder(&graph);
 
-    auto* a = builder.CreateBB();
-    auto* b = builder.CreateBB();
-    auto* c = builder.CreateBB();
-    auto* d = builder.CreateBB();
-    auto* e = builder.CreateBB();
-    auto* f = builder.CreateBB();
-    auto* g = builder.CreateBB();
-    auto* h = builder.CreateBB();
-    auto* i = builder.CreateBB();
+    auto *a = CreateBlock();
+    auto *b = CreateBlock();
+    auto *c = CreateBlock();
+    auto *d = CreateBlock();
+    auto *e = CreateBlock();
+    auto *f = CreateBlock();
+    auto *g = CreateBlock();
+    auto *h = CreateBlock();
+    auto *i = CreateBlock();
 
-    a->AddSuccessor(b);
+    LinkBlocks(a, b);
 
-    b->AddSuccessor(c);
-    b->AddSuccessor(e);
+    LinkBlocks(b, c);
+    LinkBlocks(b, e);
 
-    c->AddSuccessor(d);
+    LinkBlocks(c, d);
 
-    e->AddSuccessor(d);
-    e->AddSuccessor(f);
+    LinkBlocks(e, d);
+    LinkBlocks(e, f);
 
-    d->AddSuccessor(g);
+    LinkBlocks(d, g);
 
-    f->AddSuccessor(b);
-    f->AddSuccessor(h);
+    LinkBlocks(f, b);
+    LinkBlocks(f, h);
 
-    h->AddSuccessor(i);
-    h->AddSuccessor(g);
+    LinkBlocks(h, i);
+    LinkBlocks(h, g);
 
-    g->AddSuccessor(i);
-    g->AddSuccessor(c);
+    LinkBlocks(g, i);
+    LinkBlocks(g, c);
 
-    DominatorTree tree(&graph);
-    tree.Build();
+    BuildDominatorTree();
 
-    auto &aImmDom = tree.GetImmediateDominatedBlocks(a);
+    auto &aImmDom = tree_->GetImmediateDominatedBlocks(a);
     ASSERT_EQ(aImmDom.size(), 1);
     ASSERT_EQ(aImmDom[0], b);
 
-    auto &bImmDom = tree.GetImmediateDominatedBlocks(b);
+    auto &bImmDom = tree_->GetImmediateDominatedBlocks(b);
     ASSERT_EQ(bImmDom.size(), 5);
 
     std::set<BasicBlock*> expectedBImmDom = {i, g, c, d, e};
@@ -244,26 +271,26 @@ TEST(DominatorTree, TEST_3) {
         ASSERT_FALSE(findIt == expectedBImmDom.end());
     }
 
-    auto &eImmDom = tree.GetImmediateDominatedBlocks(e);
+    auto &eImmDom = tree_->GetImmediateDominatedBlocks(e);
     ASSERT_EQ(eImmDom.size(), 1);
     ASSERT_EQ(eImmDom[0], f);
 
-    auto &fImmDom = tree.GetImmediateDominatedBlocks(f);
+    auto &fImmDom = tree_->GetImmediateDominatedBlocks(f);
     ASSERT_EQ(fImmDom.size(), 1);
     ASSERT_EQ(fImmDom[0], h);
 
-    auto &hImmDom = tree.GetImmediateDominatedBlocks(h);
+    auto &hImmDom = tree_->GetImmediateDominatedBlocks(h);
     ASSERT_EQ(hImmDom.size(), 0);
 
-    auto &iImmDom = tree.GetImmediateDominatedBlocks(i);
+    auto &iImmDom = tree_->GetImmediateDominatedBlocks(i);
     ASSERT_EQ(iImmDom.size(), 0);
 
-    auto &gImmDom = tree.GetImmediateDominatedBlocks(g);
+    auto &gImmDom = tree_->GetImmediateDominatedBlocks(g);
     ASSERT_EQ(gImmDom.size(), 0);
 
-    auto &cImmDom = tree.GetImmediateDominatedBlocks(c);
+    auto &cImmDom = tree_->GetImmediateDominatedBlocks(c);
     ASSERT_EQ(cImmDom.size(), 0);
 
-    auto &dImmDom = tree.GetImmediateDominatedBlocks(d);
+    auto &dImmDom = tree_->GetImmediateDominatedBlocks(d);
     ASSERT_EQ(dImmDom.size(), 0);
 }

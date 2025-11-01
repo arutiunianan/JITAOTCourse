@@ -22,6 +22,20 @@ bool DominatorTree::IsDominatesOver(BasicBlock* domBlock, BasicBlock* block) con
     return it != dominatedBlocks_.at(domBlock).end();
 }
 
+bool DominatorTree::Dominates(BasicBlock *dominator, BasicBlock *dominated) const {
+    if(dominator == dominated) {
+        return true;
+    }
+    
+    auto it = dominatedBlocks_.find(dominator);
+    if(it == dominatedBlocks_.end()) {
+        return false;
+    }
+    
+    const auto &dominatedSet = it->second;
+    return std::find(dominatedSet.begin(), dominatedSet.end(), dominated) != dominatedSet.end();
+}
+
 void DominatorTree::Build() {
     RPO rpo{graph_};
     auto rpoVec = rpo.Run();
